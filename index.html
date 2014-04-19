@@ -19,8 +19,9 @@ function cbShowDay(data) {
 	return [true, '', ''];
 }
 
-function cbOnSelect(dateText, dp) {
+function cbOnSelect(dateFormat, dp) {
 	log(dp);
+	$("#shown-date").text('' + dp.selectedDay + '/' + dp.selectedMonth + '/' + dp.selectedYear);
 }
 
 var datepickerOpts = {
@@ -52,7 +53,7 @@ Date: <div id="datepicker"></div>
 </div>
 
 <div class="panel">
-Selected date: 
+	Selected date: <span id="shown-date">&nbsp;&nbsp;&nbsp;&nbsp;</span>
 </div>
 
 </div>

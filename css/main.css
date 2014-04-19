@@ -1,15 +1,17 @@
 
 .container {
-	border: 1px solid black;
+	//border: 1px solid black;
 	overflow: hidden;
 }
 
 .dp {
-	border: 1px solid red;
+	//border: 1px solid red;
+	padding: 5px;
 	float: left;
 }
 
 .panel {
-	border: 1px solid green;
+	//border: 1px solid green;
+	padding: 5px;
 	overflow: hidden;
 }
