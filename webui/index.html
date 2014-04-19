@@ -13,10 +13,25 @@ function log(msg) {
 	console && console.log && console.log(msg);
 }
 
-$(document).ready(function() {
+var enabledDatesOfMonth = [];
+
+function enabledDates(year, month) {
+	return [3, 7, 8, 10, 14, 17, 21, 22, 24, 28];
+}
+
 
 function cbShowDay(data) {
-	return [true, '', ''];
+	var enabled = false;
+	if (enabledDatesOfMonth.indexOf(data.getDate()) > -1) {
+		enabled = true;
+	}
+	return [enabled, '', ''];
+}
+
+function cbChangeMonthYear(year, month, dp) {
+	log('change month ' + month + '/' + year);
+	enabledDatesOfMonth = enabledDates(year, month);
+	console.log(enabledDatesOfMonth);
 }
 
 function cbOnSelect(dateFormat, dp) {
@@ -30,13 +45,15 @@ var datepickerOpts = {
 	dateFormat: 'ISO_8601',
 	firstDay: 1,
 	onSelect: cbOnSelect,
-	//numberOfMonths: [1,1],
-	showOtherMonths: true,
-	selectOtherMonths: true,
+	onChangeMonthYear: cbChangeMonthYear,
+	//showOtherMonths: true,
+	//selectOtherMonths: true,
 };
 
-$( "#datepicker" ).datepicker(datepickerOpts);
 
+$(document).ready(function() {
+	cbChangeMonthYear(2014, 3);
+	$("#datepicker").datepicker(datepickerOpts);
 }
 
 );
@@ -53,7 +70,8 @@ Date: <div id="datepicker"></div>
 </div>
 
 <div class="panel">
-	Selected date: <span id="shown-date">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+	<div id="shown-date">Please select a day from the date picker.</div>
+	<div id="active"></active>
 </div>
 
 </div>
