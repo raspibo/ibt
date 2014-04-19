@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Makerspace booking</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+  <link rel="stylesheet" href="css/main.css">
+  <script>
+
+function log(msg) {
+	console && console.log && console.log(msg);
+}
+
+$(document).ready(function() {
+
+function cbShowDay(data) {
+	return [true, '', ''];
+}
+
+function cbOnSelect(dateText, dp) {
+	log(dp);
+}
+
+var datepickerOpts = {
+	showAnim: 'fadeIn',
+	beforeShowDay: cbShowDay,
+	dateFormat: 'ISO_8601',
+	firstDay: 1,
+	onSelect: cbOnSelect,
+	//numberOfMonths: [1,1],
+	showOtherMonths: true,
+	selectOtherMonths: true,
+};
+
+$( "#datepicker" ).datepicker(datepickerOpts);
+
+}
+
+);
+  </script>
+</head>
+<body>
+
+<h1>RaspiBO: makerspace booking</h1>
+
+<div class="container">
+
+<div class="dp">
+Date: <div id="datepicker"></div>
+</div>
+
+<div class="panel">
+Selected date: 
+</div>
+
+</div>
+
+</body>
+</html>
