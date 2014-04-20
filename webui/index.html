@@ -82,6 +82,8 @@ var GroupView = Backbone.View.extend({
 
 	render: function() {
 		log('GroupView.render');
+		this.$el.html(this.template(this.model.toJSON()));
+		return this;
 	}
 });
 
@@ -89,6 +91,7 @@ var GroupView = Backbone.View.extend({
 var AppView = Backbone.View.extend({
 	el: $('#container'),
 
+	// seems to be prevented by the DatePicker widget.
 	events: {
 		'click .selectable-date': 'dateChanged'
 	},
@@ -96,17 +99,27 @@ var AppView = Backbone.View.extend({
 	initialize: function() {
 		log('AppView.initialize');
 		//this.listenTo(this.model, 'change', this.render);
-		//this.listenTo(groups, 'all', this.render);
+		this.listenTo(groups, 'sync', this.render);
 	},
 
-	render: function() {
-		log('AppView.render');
+	render: function(x) {
+		log('AppView.render: ' + x);
+		$("#groups-list").empty();
+		this.addAllGroups();
+	},
+
+	addGroup: function(group) {
+		var view = new GroupView({model: group});
+		this.$("#groups-list").append(view.render().el);
+	},
+
+	addAllGroups: function() {
+		groups.each(this.addGroup, this);
 	},
 
 	dateChanged: function(date) {
 		log('AppView.dateChanged');
 		groups.fetch({data: {day: date}});
-		this.render();
 	}
 });
 
@@ -150,7 +163,9 @@ Date: <div id="datepicker"></div>
 
 <div id="panel">
 	<div id="shown-date">Please select a day from the date picker.</div>
-	<div id="active"></div>
+	<div id="active">
+		<div id="groups-list"></div>
+	</div>
 </div>
 
 </div>
