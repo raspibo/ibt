@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <title>Makerspace booking</title>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+  <link rel="stylesheet" href="css/themes/smoothness/jquery-ui.css">
+  <script src="js/jquery-1.11.0.min.js"></script>
+  <script src="js/jquery-ui.js"></script>
   <script src="js/underscore-min.js"></script>
   <script src="js/backbone-min.js"></script>
   <link rel="stylesheet" href="css/main.css">
@@ -154,6 +154,7 @@ var datepickerOpts = {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
+<div>
 	<div class="group-name">Group: <%- name %></div>
 	<div class="group-members">
 		Presents:
@@ -161,6 +162,7 @@ var datepickerOpts = {
 		<% _.each(members, function(person) { %><li><%= person.name %></li> <% }); %>
 		</ul>
 	</div>
+</div>
 </script>
 
 <div id="container">
