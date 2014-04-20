@@ -72,6 +72,7 @@ $(document).ready(function() {
 
 var GroupView = Backbone.View.extend({
 	tagName: 'div',
+	className: 'group-item',
 	template: _.template($('#group-template').html()),
 
 	events: {},
@@ -153,7 +154,13 @@ var datepickerOpts = {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-	Group: <%- name %>
+	<div class="group-name">Group: <%- name %></div>
+	<div class="group-members">
+		Presents:
+		<ul class="group-members-list">
+		<% _.each(members, function(person) { %><li><%= person.name %></li> <% }); %>
+		</ul>
+	</div>
 </script>
 
 <div id="container">

@@ -19,3 +19,11 @@
 #active {
 	height: 600px;
 }
+
+.group-item {
+	display: inline;
+	border: 1px black;
+	margin: 5px;
+}
+
+
