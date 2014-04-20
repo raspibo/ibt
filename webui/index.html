@@ -49,12 +49,15 @@ var Person = Backbone.Model.extend({
 
 var groups = new Groups();
 
+
 function cbShowDay(date) {
 	var enabled = false;
+	var cls = '';
 	if (enabledDatesOfMonth.indexOf(date.getDate()) > -1) {
 		enabled = true;
+		cls = 'selectable-date';
 	}
-	return [enabled, '', ''];
+	return [enabled, cls, ''];
 }
 
 function cbChangeMonthYear(year, month, dp) {
@@ -62,9 +65,57 @@ function cbChangeMonthYear(year, month, dp) {
 	enabledDatesOfMonth = enabledDates(year, month);
 }
 
+
+$(document).ready(function() {
+	cbChangeMonthYear(2014, 3);
+
+
+var GroupView = Backbone.View.extend({
+	tagName: 'div',
+	template: _.template($('#group-template').html()),
+
+	events: {},
+
+	initialize: function() {
+		log('GroupView.initialize');
+	},
+
+	render: function() {
+		log('GroupView.render');
+	}
+});
+
+
+var AppView = Backbone.View.extend({
+	el: $('#container'),
+
+	events: {
+		'click .selectable-date': 'dateChanged'
+	},
+
+	initialize: function() {
+		log('AppView.initialize');
+		//this.listenTo(this.model, 'change', this.render);
+		//this.listenTo(groups, 'all', this.render);
+	},
+
+	render: function() {
+		log('AppView.render');
+	},
+
+	dateChanged: function(date) {
+		log('AppView.dateChanged');
+		groups.fetch({data: {day: date}});
+		this.render();
+	}
+});
+
+var App = new AppView;
+
 function cbOnSelect(dateFormat, dp) {
+	log('cbOnSelect');
 	$("#shown-date").text('' + dp.selectedDay + '/' + dp.selectedMonth + '/' + dp.selectedYear);
-	groups.fetch({data: {day: '' + dp.selectedYear + '-' + dp.selectedMonth + '-' + dp.selectedDay}});
+	App.dateChanged('' + dp.selectedYear + '-' + dp.selectedMonth + '-' + dp.selectedDay);
 }
 
 var datepickerOpts = {
@@ -73,33 +124,33 @@ var datepickerOpts = {
 	dateFormat: 'ISO_8601',
 	firstDay: 1,
 	onSelect: cbOnSelect,
+
 	onChangeMonthYear: cbChangeMonthYear,
 	//showOtherMonths: true,
 	//selectOtherMonths: true,
 };
 
-
-$(document).ready(function() {
-	cbChangeMonthYear(2014, 3);
 	$("#datepicker").datepicker(datepickerOpts);
-}
 
-);
+});
   </script>
 </head>
 <body>
 
 <h1>RaspiBO: makerspace booking</h1>
 
-<div class="container">
+<script type="text/template" id="group-template">
+	Group: <%- name %>
+</script>
 
-<div class="dp">
+<div id="container">
+<div id="dp">
 Date: <div id="datepicker"></div>
 </div>
 
-<div class="panel">
+<div id="panel">
 	<div id="shown-date">Please select a day from the date picker.</div>
-	<div id="active"></active>
+	<div id="active"></div>
 </div>
 
 </div>
