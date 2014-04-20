@@ -21,10 +21,37 @@ function enabledDates(year, month) {
 	return [3, 7, 8, 10, 14, 17, 21, 22, 24, 28];
 }
 
+var Group = Backbone.Model.extend({
+	//urlRoot: 'http://localhost/illbethere/server/group.php',
+	defaults: {name: '', members: []},
 
-function cbShowDay(data) {
+	addPerson: function(person) {
+		log('Group.addPerson');
+		log(person);
+	},
+
+	complete: function(frag) {
+		log('Group.complete: ' + frag);
+		return [];
+	}
+});
+
+var Groups = Backbone.Collection.extend({
+	url: '/illbethere/server/groups.php',
+	model: Group
+});
+
+var Person = Backbone.Model.extend({
+	urlRoot: 'http://localhost/illbethere/server/person.php',
+	defaults: {name: '', groups: []}
+});
+
+
+var groups = new Groups();
+
+function cbShowDay(date) {
 	var enabled = false;
-	if (enabledDatesOfMonth.indexOf(data.getDate()) > -1) {
+	if (enabledDatesOfMonth.indexOf(date.getDate()) > -1) {
 		enabled = true;
 	}
 	return [enabled, '', ''];
@@ -33,12 +60,11 @@ function cbShowDay(data) {
 function cbChangeMonthYear(year, month, dp) {
 	log('change month ' + month + '/' + year);
 	enabledDatesOfMonth = enabledDates(year, month);
-	console.log(enabledDatesOfMonth);
 }
 
 function cbOnSelect(dateFormat, dp) {
-	log(dp);
 	$("#shown-date").text('' + dp.selectedDay + '/' + dp.selectedMonth + '/' + dp.selectedYear);
+	groups.fetch({data: {day: '' + dp.selectedYear + '-' + dp.selectedMonth + '-' + dp.selectedDay}});
 }
 
 var datepickerOpts = {
