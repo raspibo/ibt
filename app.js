@@ -2,6 +2,9 @@
 var path = require('path');
 var logger = require('morgan');
 var express = require('express');
+var mongo = require('mongodb');
+var monk = require('monk');
+var db = monk('localhost:27017/ibt');
 
 var app = express();
 
