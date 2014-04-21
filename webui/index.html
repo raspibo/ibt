@@ -8,17 +8,31 @@
   <script src="js/jquery-ui.js"></script>
   <script src="js/underscore-min.js"></script>
   <script src="js/backbone-min.js"></script>
+  <script src="js/utils.js"></script>
   <link rel="stylesheet" href="css/main.css">
   <script>
-
-function log(msg) {
-	console && console.log && console.log(msg);
-}
 
 var enabledDatesOfMonth = [];
 
 function enabledDates(year, month) {
-	return [3, 7, 8, 10, 14, 17, 21, 22, 24, 28];
+	month -= 1;
+	var d = new Date(year, month);
+	var validDays = [];
+	var date;
+	var cd;
+	var tueCounts = 0;
+	while (d.getMonth() == month) {
+		cd = d.getDay();
+		date = d.getDate();
+		if (cd == 2) {
+			tueCounts += 1;
+		}
+		if (cd == 1 || cd == 4 || (cd == 2 && (tueCounts == 2 || tueCounts == 4))) {
+			validDays.push(date);
+		}
+		d = new Date(year, month, date+1);
+	}
+	return validDays;
 }
 
 var Group = Backbone.Model.extend({
@@ -67,11 +81,11 @@ function cbChangeMonthYear(year, month, dp) {
 
 
 $(document).ready(function() {
-	cbChangeMonthYear(2014, 3);
 
+cbChangeMonthYear(2014, 4);
 
 var GroupView = Backbone.View.extend({
-	tagName: 'div',
+	tagName: 'li',
 	className: 'group-item',
 	template: _.template($('#group-template').html()),
 
@@ -83,7 +97,8 @@ var GroupView = Backbone.View.extend({
 
 	render: function() {
 		log('GroupView.render');
-		this.$el.html(this.template(this.model.toJSON()));
+		//this.$el.html(this.template(this.model.toJSON()));
+		this.$el.html(this.template(this.model.attributes));
 		return this;
 	}
 });
@@ -154,14 +169,12 @@ var datepickerOpts = {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div>
-	<div class="group-name">Group: <%- name %></div>
-	<div class="group-members">
-		Presents:
-		<ul class="group-members-list">
-		<% _.each(members, function(person) { %><li><%= person.name %></li> <% }); %>
-		</ul>
-	</div>
+<div class="group-name">Group: <%- name %></div>
+<div class="group-members">
+	Presents:
+	<ul class="group-members-list">
+	<% _.each(members, function(person) { %><li><%= person.name %></li> <% }); %>
+	</ul>
 </div>
 </script>
 
@@ -173,7 +186,7 @@ Date: <div id="datepicker"></div>
 <div id="panel">
 	<div id="shown-date">Please select a day from the date picker.</div>
 	<div id="active">
-		<div id="groups-list"></div>
+		<ul id="groups-list"></ul>
 	</div>
 </div>
 

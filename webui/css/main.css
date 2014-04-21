@@ -20,10 +20,14 @@
 	height: 600px;
 }
 
-.group-item {
-	display: inline;
-	border: 1px black;
-	margin: 5px;
+.groups-list {
+	//display: inline;
+	//width: 100%;
 }
 
+.group-item {
+	//display: inline;
+	border: 1px solid black;
+	margin: 5px;
+}
 
