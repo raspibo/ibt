@@ -14,26 +14,6 @@
 
 var enabledDatesOfMonth = [];
 
-function enabledDates(year, month) {
-	month -= 1;
-	var d = new Date(year, month);
-	var validDays = [];
-	var date;
-	var cd;
-	var tueCounts = 0;
-	while (d.getMonth() == month) {
-		cd = d.getDay();
-		date = d.getDate();
-		if (cd == 2) {
-			tueCounts += 1;
-		}
-		if (cd == 1 || cd == 4 || (cd == 2 && (tueCounts == 2 || tueCounts == 4))) {
-			validDays.push(date);
-		}
-		d = new Date(year, month, date+1);
-	}
-	return validDays;
-}
 
 var Group = Backbone.Model.extend({
 	//urlRoot: 'http://localhost/illbethere/server/group.php',
@@ -76,13 +56,20 @@ function cbShowDay(date) {
 
 function cbChangeMonthYear(year, month, dp) {
 	log('change month ' + month + '/' + year);
-	enabledDatesOfMonth = enabledDates(year, month);
+	$.ajax({
+		url: '/utils/valid-dates-in-month',
+		dataType: 'json',
+		data: {year: year, month: month}
+	}).done(function(res) {
+		enabledDatesOfMonth = res;
+		$("#datepicker").datepicker('refresh');
+	});
 }
 
 
 $(document).ready(function() {
 
-cbChangeMonthYear(2014, 4);
+//cbChangeMonthYear(2014, 4);
 
 var GroupView = Backbone.View.extend({
 	tagName: 'li',
@@ -159,7 +146,10 @@ var datepickerOpts = {
 	//selectOtherMonths: true,
 };
 
-	$("#datepicker").datepicker(datepickerOpts);
+$("#datepicker").datepicker(datepickerOpts);
+// beforeShow seems to not work properly, in this case.
+var now = new Date();
+cbChangeMonthYear(now.getFullYear(), now.getMonth()+1, dp);
 
 });
   </script>
