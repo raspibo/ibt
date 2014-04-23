@@ -40,17 +40,63 @@ app.route('/utils/:util')
 	}
 });
 
-app.route('/data*')
+var groups_mock = [
+	{name: 'ninux', attendants: [{name: 'savino'}, {name: 'dcast'}]},
+	{name: 'meteo', attendants: [{name: 'paolo'}]}
+]
+
+var mock_groups = ['ninux', '3d', 'meteo', 'cycloscope', 'drones', 'robots', 'tavolo zero', 'killer robots'];
+var mock_attendants = ['savino', 'dcast', 'oloturia', 'ale', 'itec', 'renzo', 'il tristo mietitore', 'mario'];
+function genRandomGroups() {
+	var group;
+	var attendant;
+	var attendants;
+	var gdata;
+	var groups = [];
+	for (var i=0; i < Math.floor(Math.random()*mock_groups.length+1); i++) {
+		group = mock_groups[Math.floor(Math.random()*mock_groups.length)];
+		if (groups.indexOf(group) != -1) {
+			continue;
+		}
+		gdata = {group: 'fake_' + group};
+		attendants = [];
+		for (var j=0; j < Math.floor(Math.random()*mock_attendants.length+1); j++) {
+			attendant = mock_attendants[Math.floor(Math.random()*mock_attendants.length)];
+			if (attendants.indexOf(attendant) != -1) {
+				continue;
+			}
+			attendants.push(attendant);
+		}
+		gdata['attendants'] = [];
+		for (var x=0; x < attendants.length; x++) {
+			gdata['attendants'].push({name: 'fake_' + attendants[x]});
+		}
+		groups.push(gdata);
+	}
+	return groups;
+}
+
+var daysCollection = db.get('days');
+
+app.route('/data/groups')
 .get(function(req, res, next) {
-	res.send('DATA get ' + req.path);
+	var date = req.param('day');
+	daysCollection.find({date: date}, {}, function(err, docs) {
+		if (err) {
+			console.log('ERROR: ' + err);
+			res.json([]);
+		}
+		console.log('DOCS.length: ' + docs.length);
+		if (docs.length) {
+			res.json(docs);
+		} else {
+			res.json(genRandomGroups());
+		}
+	});
 }).post(function(req, res, next) {
 	res.send('DATA put');
 }).all(function(req, res, next) {
 	res.send('DATA all');
-});
-
-app.get('/groups*', function(req, res){
-	res.send("XIAO");
 });
 
 app.listen(3000);

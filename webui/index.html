@@ -17,7 +17,7 @@ var enabledDatesOfMonth = [];
 
 var Group = Backbone.Model.extend({
 	//urlRoot: 'http://localhost/illbethere/server/group.php',
-	defaults: {name: '', members: []},
+	defaults: {group: '', attendants: []},
 
 	addPerson: function(person) {
 		log('Group.addPerson');
@@ -31,7 +31,7 @@ var Group = Backbone.Model.extend({
 });
 
 var Groups = Backbone.Collection.extend({
-	url: '/illbethere/server/groups.php',
+	url: '/data/groups',
 	model: Group
 });
 
@@ -55,7 +55,7 @@ function cbShowDay(date) {
 }
 
 function cbChangeMonthYear(year, month, dp) {
-	log('change month ' + month + '/' + year);
+	log('change year-month to ' + year + '-' + month);
 	$.ajax({
 		url: '/utils/valid-dates-in-month',
 		dataType: 'json',
@@ -68,8 +68,6 @@ function cbChangeMonthYear(year, month, dp) {
 
 
 $(document).ready(function() {
-
-//cbChangeMonthYear(2014, 4);
 
 var GroupView = Backbone.View.extend({
 	tagName: 'li',
@@ -130,8 +128,17 @@ var App = new AppView;
 
 function cbOnSelect(dateFormat, dp) {
 	log('cbOnSelect');
-	$("#shown-date").text('' + dp.selectedDay + '/' + dp.selectedMonth + '/' + dp.selectedYear);
-	App.dateChanged('' + dp.selectedYear + '-' + dp.selectedMonth + '-' + dp.selectedDay);
+	var day = dp.selectedDay;
+	if (day < 10) {
+		day = '0' + day;
+	}
+	var month = dp.selectedMonth + 1;
+	if (month < 10) {
+		month = '0' + month;
+	}
+	var iso8601date = '' + dp.selectedYear + '-' + month + '-' + day;
+	$("#shown-date").text(iso8601date);
+	App.dateChanged(iso8601date);
 }
 
 var datepickerOpts = {
@@ -159,11 +166,11 @@ cbChangeMonthYear(now.getFullYear(), now.getMonth()+1, dp);
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div class="group-name">Group: <%- name %></div>
+<div class="group-name">Group: <%- group %></div>
 <div class="group-members">
-	Presents:
+	Attendants:
 	<ul class="group-members-list">
-	<% _.each(members, function(person) { %><li><%= person.name %></li> <% }); %>
+	<% _.each(attendants, function(person) { %><li><%= person.name %></li> <% }); %>
 	</ul>
 </div>
 </script>
