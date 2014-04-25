@@ -1,9 +1,9 @@
 
+/** Base namespace. */
 var ibt = {};
 
-ibt._noop = function() {};
-
-/** log a message to the console with the given log level. */
+/** log a message to the console with the given log level.
+ *  If an Array is passed, each item is printed separately. */
 ibt.log = function(msgs, level) {
 	var msg;
 	if (level === undefined) {
@@ -53,4 +53,13 @@ ibt.debug = function(msg) { ibt.log(msg, ibt.log.LEVEL_DEBUG); };
 ibt.info = function(msg) { ibt.log(msg, ibt.log.LEVEL_INFO); };
 ibt.warn = function(msg) { ibt.log(msg, ibt.log.LEVEL_WARN); };
 ibt.error = function(msg) { ibt.log(msg, ibt.log.LEVEL_ERROR); };
+
+
+/** i18n function. */
+ibt.translate = function(msg) {
+	return (ibt.I18N && ibt.I18N[msg]) || msg;
+};
+// global instance.
+i18n = ibt.translate;
+
 

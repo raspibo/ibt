@@ -9,6 +9,7 @@
   <script src="js/underscore-min.js"></script>
   <script src="js/backbone-min.js"></script>
   <script src="js/ibt-init.js"></script>
+  <script src="js/ibt-i18n-it.js"></script>
   <script src="js/ibt-backbone.js"></script>
   <link rel="stylesheet" href="css/main.css">
   <script>
@@ -110,9 +111,9 @@ $(document).ready(function() {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div class="group-name">Group: <%- group %></div>
+<div class="group-name"><%= i18n('Group')%>: <%- group %></div>
 <div class="group-members">
-	Attendants:
+	<%= i18n('Attendants')%>:
 	<ul class="group-members-list">
 	<% _.each(attendants, function(person) { %><li><%= person.name %></li> <% }); %>
 	</ul>
