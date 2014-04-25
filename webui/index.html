@@ -8,126 +8,48 @@
   <script src="js/jquery-ui.js"></script>
   <script src="js/underscore-min.js"></script>
   <script src="js/backbone-min.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/ibt-init.js"></script>
+  <script src="js/ibt-backbone.js"></script>
   <link rel="stylesheet" href="css/main.css">
   <script>
 
-var enabledDatesOfMonth = [];
+// Enabled dates in the shown month.
+ibt.enabledDatesOfMonth = [];
 
 
-var Group = Backbone.Model.extend({
-	//urlRoot: 'http://localhost/illbethere/server/group.php',
-	defaults: {group: '', attendants: []},
-
-	addPerson: function(person) {
-		log('Group.addPerson');
-		log(person);
-	},
-
-	complete: function(frag) {
-		log('Group.complete: ' + frag);
-		return [];
-	}
-});
-
-var Groups = Backbone.Collection.extend({
-	url: '/data/groups',
-	model: Group
-});
-
-var Person = Backbone.Model.extend({
-	urlRoot: 'http://localhost/illbethere/server/person.php',
-	defaults: {name: '', groups: []}
-});
-
-
-var groups = new Groups();
-
-
+/** Enable days in the calendar according to the content
+    of ibt.enabledDatesOfMonth. */
 function cbShowDay(date) {
 	var enabled = false;
 	var cls = '';
-	if (enabledDatesOfMonth.indexOf(date.getDate()) > -1) {
+	if (ibt.enabledDatesOfMonth.indexOf(date.getDate()) > -1) {
 		enabled = true;
 		cls = 'selectable-date';
 	}
 	return [enabled, cls, ''];
 }
 
+/** Update the list of enabled days when the month changes. */
 function cbChangeMonthYear(year, month, dp) {
-	log('change year-month to ' + year + '-' + month);
+	ibt.info('cbChangeMonthYear year:' + year + ' month:' + month);
 	$.ajax({
 		url: '/utils/valid-dates-in-month',
 		dataType: 'json',
 		data: {year: year, month: month}
-	}).done(function(res) {
-		enabledDatesOfMonth = res;
+	}).done(function(data) {
+		ibt.info(['received data:', data]);
+		ibt.enabledDatesOfMonth = data;
 		$("#datepicker").datepicker('refresh');
+	}).fail(function(jqXHR, textStatus, errorThrown) {
+		ibt.error(['unable to connect; textStatus:',
+			textStatus, 'errorThrown:', errorThrown]);
+		ibt.enabledDatesOfMonth = [];
 	});
 }
 
-
-$(document).ready(function() {
-
-var GroupView = Backbone.View.extend({
-	tagName: 'li',
-	className: 'group-item',
-	template: _.template($('#group-template').html()),
-
-	events: {},
-
-	initialize: function() {
-		log('GroupView.initialize');
-	},
-
-	render: function() {
-		log('GroupView.render');
-		//this.$el.html(this.template(this.model.toJSON()));
-		this.$el.html(this.template(this.model.attributes));
-		return this;
-	}
-});
-
-
-var AppView = Backbone.View.extend({
-	el: $('#container'),
-
-	// seems to be prevented by the DatePicker widget.
-	events: {
-		'click .selectable-date': 'dateChanged'
-	},
-
-	initialize: function() {
-		log('AppView.initialize');
-		//this.listenTo(this.model, 'change', this.render);
-		this.listenTo(groups, 'sync', this.render);
-	},
-
-	render: function(x) {
-		log('AppView.render: ' + x);
-		$("#groups-list").empty();
-		this.addAllGroups();
-	},
-
-	addGroup: function(group) {
-		var view = new GroupView({model: group});
-		this.$("#groups-list").append(view.render().el);
-	},
-
-	addAllGroups: function() {
-		groups.each(this.addGroup, this);
-	},
-
-	dateChanged: function(date) {
-		log('AppView.dateChanged');
-		groups.fetch({data: {day: date}});
-	}
-});
-
-var App = new AppView;
-
+/** Show information about the selected day. */
 function cbOnSelect(dateFormat, dp) {
-	log('cbOnSelect');
+	ibt.debug('cbOnSelect');
 	var day = dp.selectedDay;
 	if (day < 10) {
 		day = '0' + day;
@@ -138,25 +60,47 @@ function cbOnSelect(dateFormat, dp) {
 	}
 	var iso8601date = '' + dp.selectedYear + '-' + month + '-' + day;
 	$("#shown-date").text(iso8601date);
-	App.dateChanged(iso8601date);
+	ibt.app.dateChanged(iso8601date);
 }
 
+
+// Configuration for the datepicker instance.
 var datepickerOpts = {
 	showAnim: 'fadeIn',
 	beforeShowDay: cbShowDay,
 	dateFormat: 'ISO_8601',
 	firstDay: 1,
 	onSelect: cbOnSelect,
-
 	onChangeMonthYear: cbChangeMonthYear,
-	//showOtherMonths: true,
-	//selectOtherMonths: true,
 };
 
-$("#datepicker").datepicker(datepickerOpts);
-// beforeShow seems to not work properly, in this case.
-var now = new Date();
-cbChangeMonthYear(now.getFullYear(), now.getMonth()+1, dp);
+
+/* Bootstrap the app. */
+$(document).ready(function() {
+
+	/** View for a single group. */
+	ibt.GroupView = Backbone.View.extend({
+		tagName: 'li',
+		className: 'group-item',
+		template: _.template($('#group-template').html()),
+
+		render: function() {
+			ibt.debug('ibt.GroupView.render');
+			this.$el.html(this.template(this.model.attributes));
+			return this;
+		}
+	});
+
+	ibt.groupsContainer = new ibt.Groups();
+	ibt.app = new ibt.AppView({el: $('#container'),
+		groupsContainer: ibt.groupsContainer,
+		GroupView: ibt.GroupView
+	});
+
+	$("#datepicker").datepicker(datepickerOpts);
+	// beforeShow seems to not work properly, in this case.
+	var now = new Date();
+	cbChangeMonthYear(now.getFullYear(), now.getMonth()+1, dp);
 
 });
   </script>
