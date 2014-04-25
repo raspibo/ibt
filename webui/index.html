@@ -104,12 +104,30 @@ $(document).ready(function() {
 			if (!name) {
 				return;
 			}
-			var newAttendant = {name: name};
 			var attendants = this.model.get('attendants') || [];
-			attendants.push(newAttendant);
+			if (this.userInList(name, attendants)) {
+				ibt.warn('not adding duplicated user; name:' + name);
+				return;
+			}
+			ibt.info('adding new user:' + name +
+				' to group:' + this.model.get('group'));
+			attendants.push({name: name});
 			this.model.set('attendants', attendants);
 			this.model.save();
-			//ibt.error(['attributes:', this.model.attributes])
+		},
+
+		userInList: function(name, list) {
+			if (list === undefined) {
+				list = this.model.get('attendants') || [];
+			}
+			duplicated = false;
+			_.each(list, function(person) {
+				if (name == person.name) {
+					duplicated = true;
+					return;
+				}
+			});
+			return duplicated;
 		}
 	});
 
@@ -137,7 +155,7 @@ $(document).ready(function() {
 <div class="group-members">
 	<%= i18n('Attendants')%>:
 	<ul class="group-members-list">
-	  <% _.each(attendants, function(person) { %><li><%- person.name %><div class="destroy destroy-group" style="float:right;"><a href="#">[x]</a></div></li> <% }); %>
+	  <% _.each(attendants, function(person) { %><li><%- person.name %><div class="destroy destroy-user" style="float:right;"><a href="#">[x]</a></div></li> <% }); %>
 	  <li><input type="text" size="20" class="add-user" /></li>
 	</ul>
 </div>

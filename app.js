@@ -90,11 +90,12 @@ app.route('/data/groups')
 			return;
 		}
 		console.log('DOCS.length: ' + docs.length);
-		if (docs.length) {
-			res.json(docs);
-		} else {
-			res.json(genRandomGroups());
+		res.json(docs);
+		/*
+		if (!docs.length) {
+			//res.json(genRandomGroups());
 		}
+		*/
 	});
 }).post(bodyParser(), function(req, res, next) {
 	var doc = req.body;
@@ -106,8 +107,17 @@ app.route('/data/groups')
 	if (doc._isnew) {
 		delete doc._isnew;
 	}
-	daysCollection.updateById(doc._id, doc);
-	res.json('ok');
+	if (doc._id) {
+		daysCollection.updateById(doc._id, doc);
+		res.json(doc);
+	} else {
+		console.log(doc);
+		/*
+		daysCollection.insert(doc, function (err, rdoc) {
+			res.json(rdoc);
+		});
+		*/
+	}
 });
 
 app.listen(3000);
