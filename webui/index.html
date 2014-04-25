@@ -80,6 +80,8 @@ var datepickerOpts = {
 $(document).ready(function() {
 
 	/** View for a single group. */
+	// XXX: this is here only because we need to get the
+	// 	template after the DOM is loaded.
 	ibt.GroupView = Backbone.View.extend({
 		tagName: 'li',
 		className: 'group-item',
@@ -173,12 +175,12 @@ $(document).ready(function() {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div class="group-name" value="<%- group %>"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" size="20" /><% } %></div>
+<div class="group-name" value="<%- group %>"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" size="20" placeholder="group name" title="press enter to save" /><% } %></div>
 <div class="group-attendants">
 	<%= i18n('Attendants')%>:
 	<ul class="group-attendants-list">
-	  <% _.each(attendants, function(person) { %><li><span class="user-name" value="<%- person.name %>"><%- person.name %></span><span style="float:right;"><a href="#" class="destroy destroy-user" name="<%- person.name %>">[x]</a></span></li> <% }); %>
-	  <li><input type="text" size="20" class="add-user" /></li>
+	  <% _.each(attendants, function(person) { %><li><span class="user-name" value="<%- person.name %>"><%- person.name %></span><span style="float:right;"><a href="#" class="destroy destroy-user" name="<%- person.name %>" title="remove this user">[x]</a></span></li> <% }); %>
+	  <li><input type="text" size="20" class="add-user" placeholder="add your name" title="press enter to save" /></li>
 	</ul>
 </div>
 </script>
