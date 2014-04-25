@@ -84,7 +84,10 @@ $(document).ready(function() {
 		tagName: 'li',
 		className: 'group-item',
 		template: _.template($('#group-template').html()),
-		events: {'keypress .add-user': 'addUser'},
+		events: {
+			'keypress .add-user': 'addUser',
+			'click .destroy-user': 'removeUser',
+		},
 
 		initialize: function(args) {
 			this.listenTo(this.model, 'sync', this.render);
@@ -112,6 +115,25 @@ $(document).ready(function() {
 			ibt.info('adding new user:' + name +
 				' to group:' + this.model.get('group'));
 			attendants.push({name: name});
+			this.model.set('attendants', attendants);
+			this.model.save();
+		},
+
+		removeUser: function(evt) {
+			var name = $(evt.currentTarget).attr('name');
+			if (!name) {
+				return;
+			}
+			var currentAttendants = this.model.get('attendants') || [];
+			var attendants = _.filter(
+				currentAttendants,
+				function(person) { return person.name != name; }
+			);
+			if (currentAttendants.length == attendants.length) {
+				ibt.warn('user not removed; name:' + name);
+				return;
+			}
+			ibt.info('removing user; name:' + name);
 			this.model.set('attendants', attendants);
 			this.model.save();
 		},
@@ -151,11 +173,11 @@ $(document).ready(function() {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div class="group-name"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" size="20" /><% } %></div>
-<div class="group-members">
+<div class="group-name" value="<%- group %>"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" size="20" /><% } %></div>
+<div class="group-attendants">
 	<%= i18n('Attendants')%>:
-	<ul class="group-members-list">
-	  <% _.each(attendants, function(person) { %><li><%- person.name %><div class="destroy destroy-user" style="float:right;"><a href="#">[x]</a></div></li> <% }); %>
+	<ul class="group-attendants-list">
+	  <% _.each(attendants, function(person) { %><li><span class="user-name" value="<%- person.name %>"><%- person.name %></span><span style="float:right;"><a href="#" class="destroy destroy-user" name="<%- person.name %>">[x]</a></span></li> <% }); %>
 	  <li><input type="text" size="20" class="add-user" /></li>
 	</ul>
 </div>
