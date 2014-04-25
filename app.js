@@ -2,6 +2,7 @@
 var path = require('path');
 var logger = require('morgan');
 var express = require('express');
+var bodyParser = require('body-parser');
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/ibt');
@@ -9,6 +10,7 @@ var db = monk('localhost:27017/ibt');
 var app = express();
 
 app.use(logger());
+app.use(bodyParser());
 app.use(express.static(path.join(__dirname, 'webui')));
 
 function enabledDates(year, month) {
@@ -83,8 +85,9 @@ app.route('/data/groups')
 	var date = req.param('day');
 	daysCollection.find({date: date}, {}, function(err, docs) {
 		if (err) {
-			console.log('ERROR: ' + err);
+			console.error('ERROR: ' + err);
 			res.json([]);
+			return;
 		}
 		console.log('DOCS.length: ' + docs.length);
 		if (docs.length) {
@@ -93,10 +96,18 @@ app.route('/data/groups')
 			res.json(genRandomGroups());
 		}
 	});
-}).post(function(req, res, next) {
-	res.send('DATA put');
-}).all(function(req, res, next) {
-	res.send('DATA all');
+}).post(bodyParser(), function(req, res, next) {
+	var doc = req.body;
+	if (!doc) {
+		console.error('NO DATA RECEIVED');
+		res.json('failure');
+		return;
+	}
+	if (doc._isnew) {
+		delete doc._isnew;
+	}
+	daysCollection.updateById(doc._id, doc);
+	res.json('ok');
 });
 
 app.listen(3000);

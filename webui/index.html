@@ -60,7 +60,7 @@ function cbOnSelect(dateFormat, dp) {
 		month = '0' + month;
 	}
 	var iso8601date = '' + dp.selectedYear + '-' + month + '-' + day;
-	$("#shown-date").text(iso8601date);
+	//$("#select-a-date").text(iso8601date);
 	ibt.app.dateChanged(iso8601date);
 }
 
@@ -84,16 +84,38 @@ $(document).ready(function() {
 		tagName: 'li',
 		className: 'group-item',
 		template: _.template($('#group-template').html()),
+		events: {'keypress .add-user': 'addUser'},
+
+		initialize: function(args) {
+			this.listenTo(this.model, 'sync', this.render);
+		},
 
 		render: function() {
 			ibt.debug('ibt.GroupView.render');
 			this.$el.html(this.template(this.model.attributes));
 			return this;
+		},
+
+		addUser: function(evt) {
+			if (evt.keyCode != 13) {
+				return;
+			}
+			var name = this.$('.add-user').val();
+			if (!name) {
+				return;
+			}
+			var newAttendant = {name: name};
+			var attendants = this.model.get('attendants') || [];
+			attendants.push(newAttendant);
+			this.model.set('attendants', attendants);
+			this.model.save();
+			//ibt.error(['attributes:', this.model.attributes])
 		}
 	});
 
 	ibt.groupsContainer = new ibt.Groups();
-	ibt.app = new ibt.AppView({el: $('#container'),
+	ibt.app = new ibt.AppView({
+		el: $('#panel'),
 		groupsContainer: ibt.groupsContainer,
 		GroupView: ibt.GroupView
 	});
@@ -111,11 +133,12 @@ $(document).ready(function() {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div class="group-name"><%= i18n('Group')%>: <%- group %></div>
+<div class="group-name"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" size="20" /><% } %></div>
 <div class="group-members">
 	<%= i18n('Attendants')%>:
 	<ul class="group-members-list">
-	<% _.each(attendants, function(person) { %><li><%= person.name %></li> <% }); %>
+	  <% _.each(attendants, function(person) { %><li><%- person.name %><div class="destroy destroy-group" style="float:right;"><a href="#">[x]</a></div></li> <% }); %>
+	  <li><input type="text" size="20" class="add-user" /></li>
 	</ul>
 </div>
 </script>
@@ -126,10 +149,12 @@ Date: <div id="datepicker"></div>
 </div>
 
 <div id="panel">
-	<div id="shown-date">Please select a day from the date picker.</div>
+	<div id="select-a-date">Please select a day from the date picker.</div>
+	<div id="curent-date"></div>
 	<div id="active">
 		<ul id="groups-list"></ul>
 	</div>
+
 </div>
 
 </div>

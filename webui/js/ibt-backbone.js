@@ -3,7 +3,7 @@
 
 /** Model of a group. */
 ibt.Group = Backbone.Model.extend({
-	defaults: {group: '', attendants: []},
+	defaults: {group: '', attendants: [], _isnew: false},
 });
 
 
@@ -30,8 +30,10 @@ ibt.AppView = Backbone.View.extend({
 
 	render: function() {
 		ibt.debug('ibt.AppView.render');
+		this.$('#select-a-date').hide();
 		$("#groups-list").empty();
 		this.addAllGroups();
+		this.addGroup(new ibt.Group({_isnew: true}));
 		return this;
 	},
 
