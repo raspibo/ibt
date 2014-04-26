@@ -84,7 +84,7 @@ $(document).ready(function() {
 	// 	template after the DOM is loaded.
 	ibt.groupViewTemplate = _.template($('#group-template').html());
 	ibt.GroupView = Backbone.View.extend({
-		tagName: 'li',
+		tagName: 'div',
 		className: 'group-item',
 		template: ibt.groupViewTemplate,
 		events: {
@@ -162,19 +162,19 @@ $(document).ready(function() {
 <h1>RaspiBO makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div class="group-name" value="<%- group %>"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" class="new-group" name="new-group" size="20" placeholder="group name" title="press enter to save" /><% } %></div>
+<div class="group-name" value="<%- group %>"><label><%= i18n('Group')%>:</label> <%- group %><% if (!group) { %><input type="text" class="new-group" name="new-group" size="20" placeholder="new group name" title="press enter to save" /><% } %></div>
 <div class="group-attendants">
-	<%= i18n('Attendants')%>:
+	<label><%= i18n('Attendants')%>:</label>
 	<ul class="group-attendants-list">
-	  <% _.each(attendants, function(person) { %><li><span class="user-name" value="<%- person.name %>"><%- person.name %></span><span style="float:right;"><a href="#" class="destroy destroy-user" name="<%- person.name %>" title="remove this user">[x]</a></span></li> <% }); %>
-	  <li><input type="text" size="20" class="add-user" placeholder="add your name" title="press enter to save" /></li>
+	  <% _.each(attendants, function(person) { %><li><a href="#" class="destroy destroy-user" name="<%- person.name %>" title="remove this user">&nbsp;&nbsp;&nbsp;&nbsp;</a><span class="user-name" value="<%- person.name %>"><%- person.name %></span></li> <% }); %>
+	  <li><span class="add-user-icon">&nbsp;&nbsp;&nbsp;&nbsp;</span><input type="text" size="20" class="add-user" placeholder="add your name" title="press enter to save" /></li>
 	</ul>
 </div>
 </script>
 
 <div id="container">
 <div id="dp">
-Date: <div id="datepicker"></div>
+<div id="datepicker"></div>
 </div>
 
 <div id="panel">

@@ -1,18 +1,14 @@
 
 #container {
-	//border: 1px solid black;
 	overflow: hidden;
 }
 
 #dp {
-	//border: 1px solid red;
 	padding: 5px;
 	float: left;
 }
 
 #panel {
-	//border: 1px solid green;
-	padding: 5px;
 	overflow: hidden;
 }
 
@@ -21,13 +17,75 @@
 }
 
 .groups-list {
-	//display: inline;
-	//width: 100%;
+	width: 100%;
 }
 
 .group-item {
-	//display: inline;
-	border: 1px solid black;
+	float: left;
+	border: 1px solid lightgrey;
+	background-color: #fffea3;
+	padding: 4px;
 	margin: 5px;
 }
+
+.group-name {
+	font-size: 24px;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+.group-attendants {
+	font-size: 18px;
+}
+
+.group-name label, .group-attendants label {
+	color: grey;
+	font-weight: bold;
+}
+
+.group-attendants ul {
+	list-style: none;
+	margin-left: 10px;
+	padding: 0px;
+}
+
+.group-attendants li {
+	border-bottom: 1px solid #cccccc;
+	margin-left: 0px;
+	padding: 4px;
+}
+
+.group-attendants li:last-child {
+	border-bottom: none;
+}
+
+.group-attendants-list a.destroy {
+	width: 12px;
+	height: 12px;
+	font-style: none;
+	margin-left: 5px;
+	visibility: hidden;
+	position: relative;
+	top: 5px;
+	text-decoration: none;
+	background: url(dialog-cancel-4.png) no-repeat;
+}
+
+.group-attendants-list li:hover a.destroy {
+	visibility: visible;
+}
+
+#add-group {
+	background-color: #ffcece;
+}
+
+.group-attendants span.add-user-icon {
+	width: 12px;
+	height: 12px;
+	margin-left: 5px;
+	position: relative;
+	top: 5px;
+	background: url(dialog-more.png) no-repeat;
+}
+
 
