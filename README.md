@@ -26,6 +26,7 @@ Ideas for improvements
 * ajax auto-completion of group and user names
 * periodic/push refresh
 * user login and permissions (at least on deleting items)
+* admin credentials and management page (to add/remove extra dates, for example)
 * user's preferences (at least to remember the name)
 
 TODO (technical stuff)
@@ -35,6 +36,10 @@ TODO (technical stuff)
 * clean-up/refactory the code
 * i18n
 * improve documentation
+* split app.js into submodules
+* stop using monk
+* introduce a template for the backbone AppView object
+* move the GroupsView object into the ibt-backbone.js file
 
 Author
 ======
