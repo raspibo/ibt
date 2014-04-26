@@ -8,7 +8,9 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb');
 var monk = require('monk');
-var db = monk('localhost:27017/ibt');
+var db = monk('localhost:27017/ibt?auto_reconnect=true');
+
+var MongoClient = require('mongodb').MongoClient;
 
 var app = express();
 
