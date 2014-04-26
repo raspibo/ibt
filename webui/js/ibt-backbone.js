@@ -2,8 +2,10 @@
 
 
 /** Model of a group. */
+ibt.groupDefaults = {date: '', group: '', attendants: []}
 ibt.Group = Backbone.Model.extend({
-	defaults: {group: '', attendants: [], _isnew: false},
+	url: '/data/groups',
+	defaults: ibt.groupDefaults,
 });
 
 
@@ -18,14 +20,15 @@ ibt.Groups = Backbone.Collection.extend({
 ibt.AppView = Backbone.View.extend({
 	// seems to be prevented by the DatePicker widget.
 	events: {
-		'click .selectable-date': 'dateChanged'
+		'click .selectable-date': 'dateChanged',
+		'keypress #add-group input': 'newGroup'
 	},
 
 	initialize: function(args) {
-		ibt.debug('ibt.AppView.initialize');
-		this.groupsContainer = args.groupsContainer;
+		ibt.debug(['ibt.AppView.initialize; args:', args]);
+		this.groupsCollection = args.groupsCollection;
 		this.GroupView = args.GroupView;
-		this.listenTo(this.groupsContainer, 'sync', this.render);
+		this.listenTo(this.groupsCollection, 'sync', this.render);
 	},
 
 	render: function() {
@@ -33,7 +36,9 @@ ibt.AppView = Backbone.View.extend({
 		this.$('#select-a-date').hide();
 		$("#groups-list").empty();
 		this.addAllGroups();
-		this.addGroup(new ibt.Group({_isnew: true}));
+		this.$('#groups-list').append('<li class="group-item" id="add-group">' +
+			ibt.groupViewTemplate(ibt.groupDefaults) +
+			'</li>');
 		return this;
 	},
 
@@ -44,12 +49,51 @@ ibt.AppView = Backbone.View.extend({
 	},
 
 	addAllGroups: function() {
-		this.groupsContainer.each(this.addGroup, this);
+		this.groupsCollection.each(this.addGroup, this);
+	},
+
+	newGroup: function(evt) {
+		if (evt.keyCode != 13) {
+			return;
+		}
+		if (!this.selectedDate) {
+			return;
+		}
+		var personName = $('#add-group .add-user').val();
+		if (!personName) {
+			$('#add-group .add-user').focus();
+			return;
+		}
+		var groupName = $('#add-group .new-group').val();
+		if (!groupName) {
+			$('#add-group .new-group').focus();
+			return;
+		}
+		var duplicated = false;
+		this.groupsCollection.each(function(group) {
+			if (group.get('group') == groupName) {
+				duplicated = true;
+				return;
+			}
+		});
+		if (duplicated) {
+			ibt.info('avoid creation of duplicated group:' + groupName);
+			return;
+		}
+		ibt.info(['create group:', groupName,
+			'on date:', this.selectedDate,
+			'by user:', personName]);
+		this.groupsCollection.create({
+			date: this.selectedDate,
+			group: groupName,
+			attendants: [{name: personName}]
+		});
 	},
 
 	dateChanged: function(date) {
 		ibt.info('ibt.AppView.dateChanged; date:' + date);
-		this.groupsContainer.fetch({data: {day: date}});
+		this.selectedDate = date;
+		this.groupsCollection.fetch({data: {day: date}});
 	}
 });
 

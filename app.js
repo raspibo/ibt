@@ -112,11 +112,9 @@ app.route('/data/groups')
 		res.json(doc);
 	} else {
 		console.log(doc);
-		/*
 		daysCollection.insert(doc, function (err, rdoc) {
-			res.json(rdoc);
+			res.json('ok');
 		});
-		*/
 	}
 });
 

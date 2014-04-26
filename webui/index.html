@@ -82,16 +82,19 @@ $(document).ready(function() {
 	/** View for a single group. */
 	// XXX: this is here only because we need to get the
 	// 	template after the DOM is loaded.
+	ibt.groupViewTemplate = _.template($('#group-template').html());
 	ibt.GroupView = Backbone.View.extend({
 		tagName: 'li',
 		className: 'group-item',
-		template: _.template($('#group-template').html()),
+		template: ibt.groupViewTemplate,
 		events: {
 			'keypress .add-user': 'addUser',
 			'click .destroy-user': 'removeUser',
 		},
 
-		initialize: function(args) {
+		initialize: function(attributes, options) {
+			ibt.debug(['ibt.GroupView.initialize; attributes:',
+				attributes, 'options:', options]);
 			this.listenTo(this.model, 'sync', this.render);
 		},
 
@@ -155,10 +158,10 @@ $(document).ready(function() {
 		}
 	});
 
-	ibt.groupsContainer = new ibt.Groups();
+	ibt.groupsCollection = new ibt.Groups();
 	ibt.app = new ibt.AppView({
 		el: $('#panel'),
-		groupsContainer: ibt.groupsContainer,
+		groupsCollection: ibt.groupsCollection,
 		GroupView: ibt.GroupView
 	});
 
@@ -175,7 +178,7 @@ $(document).ready(function() {
 <h1>RaspiBO: makerspace booking</h1>
 
 <script type="text/template" id="group-template">
-<div class="group-name" value="<%- group %>"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" size="20" placeholder="group name" title="press enter to save" /><% } %></div>
+<div class="group-name" value="<%- group %>"><%= i18n('Group')%>: <%- group %><% if (!group) { %><input type="text" class="new-group" name="new-group" size="20" placeholder="group name" title="press enter to save" /><% } %></div>
 <div class="group-attendants">
 	<%= i18n('Attendants')%>:
 	<ul class="group-attendants-list">
