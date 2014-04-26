@@ -5,7 +5,30 @@
 ibt.groupDefaults = {date: '', group: '', attendants: []}
 ibt.Group = Backbone.Model.extend({
 	defaults: ibt.groupDefaults,
-	idAttribute: '_id'
+	idAttribute: '_id',
+
+	addUser: function(name) {
+		if (!name) {
+			return;
+		}
+		var attendants = this.get('attendants') || [];
+		duplicated = false;
+		_.each(attendants, function(person) {
+			if (name == person.name) {
+				duplicated = true;
+				return;
+			}
+		});
+		if (duplicated) {
+			ibt.warn('not adding duplicated user; name:' + name);
+			return false;
+		}
+		ibt.info('adding new user:' + name +
+			' to group:' + this.get('group'));
+		attendants.push({name: name});
+		this.set('attendants', attendants);
+		return true;
+	}
 });
 
 
@@ -69,15 +92,17 @@ ibt.AppView = Backbone.View.extend({
 			$('#add-group .new-group').focus();
 			return;
 		}
-		var duplicated = false;
+		var duplicatedGroup = null;
 		this.groupsCollection.each(function(group) {
 			if (group.get('group') == groupName) {
-				duplicated = true;
+				duplicatedGroup = group;
 				return;
 			}
 		});
-		if (duplicated) {
+		if (duplicatedGroup) {
 			ibt.info('avoid creation of duplicated group:' + groupName);
+			duplicatedGroup.addUser(personName);
+			duplicatedGroup.save();
 			return;
 		}
 		ibt.info(['create group:', groupName,

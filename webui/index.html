@@ -110,19 +110,9 @@ $(document).ready(function() {
 				return;
 			}
 			var name = this.$('.add-user').val();
-			if (!name) {
-				return;
+			if (this.model.addUser(name)) {
+				this.model.save();
 			}
-			var attendants = this.model.get('attendants') || [];
-			if (this.userInList(name, attendants)) {
-				ibt.warn('not adding duplicated user; name:' + name);
-				return;
-			}
-			ibt.info('adding new user:' + name +
-				' to group:' + this.model.get('group'));
-			attendants.push({name: name});
-			this.model.set('attendants', attendants);
-			this.model.save();
 		},
 
 		removeUser: function(evt) {
@@ -150,19 +140,6 @@ $(document).ready(function() {
 			this.model.save();
 		},
 
-		userInList: function(name, list) {
-			if (list === undefined) {
-				list = this.model.get('attendants') || [];
-			}
-			duplicated = false;
-			_.each(list, function(person) {
-				if (name == person.name) {
-					duplicated = true;
-					return;
-				}
-			});
-			return duplicated;
-		}
 	});
 
 	ibt.groupsCollection = new ibt.Groups();
