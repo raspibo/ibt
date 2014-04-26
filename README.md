@@ -28,6 +28,7 @@ TODO
 * login
 * user's settings
 * error handling (and messages) on the UI
+* periodic/push refresh
 
 
 Author
