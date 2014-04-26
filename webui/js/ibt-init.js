@@ -46,7 +46,7 @@ ibt.log.setLevel = function(level) {
 
 // Set the default log level.
 ibt.log.setLevel(ibt.log.LEVEL_WARN);
-ibt.log.setLevel(ibt.log.LEVEL_DEBUG);
+//ibt.log.setLevel(ibt.log.LEVEL_DEBUG);
 
 // Shortcut functions for logging.
 ibt.debug = function(msg) { ibt.log(msg, ibt.log.LEVEL_DEBUG); };

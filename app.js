@@ -1,3 +1,6 @@
+/**
+ * I'll be there server app.
+ */
 
 var path = require('path');
 var logger = require('morgan');
@@ -13,13 +16,20 @@ app.use(logger());
 app.use(bodyParser());
 app.use(express.static(path.join(__dirname, 'webui')));
 
-function enabledDates(year, month) {
+var daysCollection = db.get('days');
+var enabledDaysCollection = db.get('enabledDays');
+var disabledDaysCollection = db.get('disabledDays');
+
+
+function enabledDates(year, month, includeDays, excludeDays) {
 	month -= 1;
 	var d = new Date(year, month);
 	var validDays = [];
 	var date;
 	var dayOfWeek;
 	var tueCounts = 0;
+	includeDays = includeDays || [];
+	excludeDays = excludeDays || [];
 	while (d.getMonth() == month) {
 		dayOfWeek = d.getDay();
 		date = d.getDate();
@@ -27,20 +37,21 @@ function enabledDates(year, month) {
 			tueCounts += 1;
 		}
 		if (dayOfWeek == 1 || dayOfWeek == 4 || (dayOfWeek == 2 && (tueCounts == 2 || tueCounts == 4))) {
-			validDays.push(date);
+			if (excludeDays.indexOf(date) == -1) {
+				validDays.push(date);
+			}
 		}
 		d = new Date(year, month, date+1);
+	}
+	for (var i=0; i < includeDays.length; i++) {
+		date = includeDays[i];
+		if (validDays.indexOf(date) == -1) {
+			validDays.push(date);
+		}
 	}
 	return validDays;
 }
 
-
-app.route('/utils/:util')
-.get(function(req, res, next) {
-	if (req.params.util == 'valid-dates-in-month') {
-		res.json(enabledDates(req.param('year'), req.param('month')));
-	}
-});
 
 var groups_mock = [
 	{name: 'ninux', attendants: [{name: 'savino'}, {name: 'dcast'}]},
@@ -78,18 +89,49 @@ function genRandomGroups() {
 	return groups;
 }
 
-var daysCollection = db.get('days');
 
-app.route('/data/groups')
+app.route('/utils/:util')
+.get(function(req, res, next) {
+	if (req.params.util == 'valid-dates-in-month') {
+		var year = parseInt(req.param('year'));
+		var month = parseInt(req.param('month'));
+		var includeDays = [];
+		var excludeDays = [];
+		if (!(year && month)) {
+			console.error('incomplete date; year:' + year + ' month:' + month);
+			res.status(404).json({success: false, msg: 'incomplete date'});
+			return;
+		}
+		// Fetch extra enabled/disabled days.
+		enabledDaysCollection.find({year: year, month: month}).on('complete', function(err, docs) {
+			if (err) { docs = []; }
+			for (var i=0; i < docs.length; i++) {
+				includeDays.push(docs[i].day);
+			}
+			disabledDaysCollection.find({year: year, month: month}).on('complete', function(err, docs) {
+				if (err) { docs = []; }
+				for (var i=0; i < docs.length; i++) {
+					excludeDays.push(docs[i].day);
+				}
+				res.json(enabledDates(req.param('year'), req.param('month'), includeDays, excludeDays));
+			});
+		});
+	}
+});
+
+
+app.route('/data/groups/:id?')
 .get(function(req, res, next) {
 	var date = req.param('day');
 	daysCollection.find({date: date}, {}, function(err, docs) {
 		if (err) {
-			console.error('ERROR: ' + err);
-			res.json([]);
+			console.error('error fetching groups list: ' + err);
+			res.status(400).json([]);
 			return;
 		}
-		console.log('DOCS.length: ' + docs.length);
+		console.log('docs.length: ' + docs.length);
+		console.log('docs:');
+		console.log(docs);
 		res.json(docs);
 		/*
 		if (!docs.length) {
@@ -97,25 +139,68 @@ app.route('/data/groups')
 		}
 		*/
 	});
-}).post(bodyParser(), function(req, res, next) {
+})
+.all(function(req, res, next) {
+	// Preliminary checks for the following methods.
+	if (req.method == 'put' || req.method == 'delete') {
+		if (!req.param('id')) {
+			console.error('missing ID');
+			res.status(404).json({success: false, msg: 'missing ID'});
+			return;
+		}
+		if (req.method != 'delete') {
+			if (!req.body) {
+				console.error('missing document');
+				res.status(404).json({success: false, msg: 'missing document'});
+				return;
+			}
+		}
+	}
+	next();
+})
+.put(function(req, res, next) {
 	var doc = req.body;
-	if (!doc) {
-		console.error('NO DATA RECEIVED');
-		res.json('failure');
-		return;
-	}
-	if (doc._isnew) {
-		delete doc._isnew;
-	}
-	if (doc._id) {
-		daysCollection.updateById(doc._id, doc);
-		res.json(doc);
-	} else {
-		console.log(doc);
-		daysCollection.insert(doc, function (err, rdoc) {
-			res.json('ok');
-		});
-	}
+	var id = req.param('id');
+	console.info('modify a document:');
+	console.info(doc);
+	daysCollection.updateById(id, doc, {}, function(err, rdoc) {
+		if (err) {
+			console.error('error modifying a document:');
+			console.error(err);
+			res.status(400).json({success: false, msg: err});
+			return;
+		}
+		res.json(rdoc);
+	});
+})
+.post(function(req, res, next) {
+	var doc = req.body;
+	console.info('create a new document:');
+	console.info(doc);
+	daysCollection.insert(doc, {}, function(err, rdoc) {
+		if (err) {
+			console.error('error creating a new document:');
+			console.error(err);
+			res.status(400).json({success: false, msg: err});
+			return;
+		}
+		console.log('return doc:');
+		console.log(rdoc);
+		res.status(201).json(rdoc);
+	});
+})
+.delete(function(req, res, next) {
+	var id = req.param('id');
+	console.info('remove group id:' + id);
+	daysCollection.remove({_id: id}, {}, function(err, rdoc) {
+		if (err) {
+			console.error('error deleting document:');
+			console.error(err);
+			res.status(400).json({success: false, msg: err});
+			return;
+		}
+		res.status(202).json({success: true});
+	});
 });
 
 app.listen(3000);

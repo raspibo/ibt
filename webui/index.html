@@ -96,6 +96,7 @@ $(document).ready(function() {
 			ibt.debug(['ibt.GroupView.initialize; attributes:',
 				attributes, 'options:', options]);
 			this.listenTo(this.model, 'sync', this.render);
+			this.listenTo(this.model, 'destroy', this.remove);
 		},
 
 		render: function() {
@@ -140,6 +141,12 @@ $(document).ready(function() {
 			}
 			ibt.info('removing user; name:' + name);
 			this.model.set('attendants', attendants);
+			if (attendants.length == 0) {
+				ibt.info('removing empty group:' + this.model.get('group'));
+				ibt.log(['ID:', this.model.get('_id')])
+				this.model.destroy({});
+				return;
+			}
 			this.model.save();
 		},
 

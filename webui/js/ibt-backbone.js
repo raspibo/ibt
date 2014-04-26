@@ -4,15 +4,15 @@
 /** Model of a group. */
 ibt.groupDefaults = {date: '', group: '', attendants: []}
 ibt.Group = Backbone.Model.extend({
-	url: '/data/groups',
 	defaults: ibt.groupDefaults,
+	idAttribute: '_id'
 });
 
 
 /** Collection of Groups. */
 ibt.Groups = Backbone.Collection.extend({
 	url: '/data/groups',
-	model: ibt.Group
+	model: ibt.Group,
 });
 
 
