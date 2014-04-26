@@ -20,6 +20,16 @@ Installation
 * watch in awe.
 
 
+TODO
+====
+
+* Real separation of MVC
+* i18n
+* login
+* user's settings
+* error handling (and messages) on the UI
+
+
 Author
 ======
 
