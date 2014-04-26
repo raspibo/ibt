@@ -8,6 +8,13 @@
 	float: left;
 }
 
+#curent-date {
+	display: none;
+	padding: 3px;
+	font: 16px;
+	font-weight: bold;
+}
+
 #panel {
 	overflow: hidden;
 }

@@ -57,6 +57,8 @@ ibt.AppView = Backbone.View.extend({
 	render: function() {
 		ibt.debug('ibt.AppView.render');
 		this.$('#select-a-date').hide();
+		this.$('#curent-date-label').text(this.selectedDate);
+		this.$('#curent-date').show();
 		$("#groups-list").empty();
 		this.addAllGroups();
 		this.$('#groups-list').append('<div class="group-item" id="add-group">' +
