@@ -13,6 +13,9 @@ var fs = require('fs');
 var http = require('http');
 var https = require('https');
 
+// If true, generates fake data for empty days.
+var USE_MOCK_DATA = false;
+
 var httpsOptions = {};
 
 try {
@@ -68,11 +71,6 @@ function enabledDates(year, month, includeDays, excludeDays) {
 	return validDays;
 }
 
-
-var groups_mock = [
-	{name: 'ninux', attendants: [{name: 'savino'}, {name: 'dcast'}]},
-	{name: 'meteo', attendants: [{name: 'paolo'}]}
-]
 
 var mock_groups = ['ninux', '3d', 'meteo', 'cycloscope', 'drones', 'robots', 'tavolo zero', 'killer robots'];
 var mock_attendants = ['savino', 'dcast', 'oloturia', 'ale', 'itec', 'renzo', 'il tristo mietitore', 'mario'];
@@ -148,12 +146,10 @@ app.route('/data/groups/:id?')
 		console.log('docs.length: ' + docs.length);
 		console.log('docs:');
 		console.log(docs);
-		res.json(docs);
-		/*
-		if (!docs.length) {
-			//res.json(genRandomGroups());
+		if (USE_MOCK_DATA && !docs.length) {
+			res.json(genRandomGroups());
 		}
-		*/
+		res.json(docs);
 	});
 })
 .all(function(req, res, next) {
