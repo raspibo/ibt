@@ -9,6 +9,20 @@ var bodyParser = require('body-parser');
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/ibt?auto_reconnect=true');
+var fs = require('fs');
+var http = require('http');
+var https = require('https');
+
+var httpsOptions = {};
+
+try {
+	httpsOptions = {
+		key: fs.readFileSync('ssl/ibt.key'),
+		cert: fs.readFileSync('ssl/ibt.pem')
+	};
+} catch (error) {
+	console.warn('missing certificates; https will not be enabled: ' + error);
+}
 
 var MongoClient = require('mongodb').MongoClient;
 
@@ -205,5 +219,9 @@ app.route('/data/groups/:id?')
 	});
 });
 
-app.listen(3000);
+
+http.createServer(app).listen(3000);
+if (httpsOptions.key && httpsOptions.cert) {
+	https.createServer(httpsOptions, app).listen(3001);
+}
 
