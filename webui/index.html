@@ -37,7 +37,7 @@ function cbChangeMonthYear(year, month, dp) {
 		url: '/utils/valid-dates-in-month',
 		dataType: 'json',
 		data: {year: year, month: month}
-	}).done(function(data) {
+	}).success(function(data) {
 		ibt.info(['received data:', data]);
 		ibt.enabledDatesOfMonth = data;
 		$("#datepicker").datepicker('refresh');
@@ -110,9 +110,10 @@ $(document).ready(function() {
 				return;
 			}
 			var name = this.$('.add-user').val();
-			if (this.model.addUser(name)) {
-				this.model.save();
+			if (!name) {
+				return;
 			}
+			this.model.addUser(name);
 		},
 
 		removeUser: function(evt) {
@@ -120,24 +121,7 @@ $(document).ready(function() {
 			if (!name) {
 				return;
 			}
-			var currentAttendants = this.model.get('attendants') || [];
-			var attendants = _.filter(
-				currentAttendants,
-				function(person) { return person.name != name; }
-			);
-			if (currentAttendants.length == attendants.length) {
-				ibt.warn('user not removed; name:' + name);
-				return;
-			}
-			ibt.info('removing user; name:' + name);
-			this.model.set('attendants', attendants);
-			if (attendants.length == 0) {
-				ibt.info('removing empty group:' + this.model.get('group'));
-				ibt.log(['ID:', this.model.get('_id')])
-				this.model.destroy({});
-				return;
-			}
-			this.model.save();
+			this.model.removeUser(name);
 		},
 
 	});
@@ -166,7 +150,7 @@ $(document).ready(function() {
 <div class="group-attendants">
 	<label><%= i18n('Attendants')%>:</label>
 	<ul class="group-attendants-list">
-	  <% _.each(attendants, function(person) { %><li><a href="#" class="destroy destroy-user" name="<%- person.name %>" title="remove this user">&nbsp;&nbsp;&nbsp;&nbsp;</a><span class="user-name" value="<%- person.name %>"><%- person.name %></span></li> <% }); %>
+	  <% _.each(attendants, function(person) { %><li><a href="#" class="destroy destroy-user" name="<%- person.get('name') %>" title="remove this user">&nbsp;&nbsp;&nbsp;&nbsp;</a><span class="user-name" value="<%- person.get('name') %>"><%- person.get('name') %></span></li> <% }); %>
 	  <li><span class="add-user-icon">&nbsp;&nbsp;&nbsp;&nbsp;</span><input type="text" size="20" class="add-user" placeholder="add your name" title="press enter to save" /></li>
 	</ul>
 </div>

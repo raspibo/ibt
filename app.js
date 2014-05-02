@@ -6,15 +6,20 @@ var path = require('path');
 var logger = require('morgan');
 var express = require('express');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/ibt?auto_reconnect=true');
 var fs = require('fs');
+var bcrypt = require('bcrypt');
+
 var http = require('http');
 var https = require('https');
 
 // If true, generates fake data for empty days.
 var USE_MOCK_DATA = false;
+
 
 var httpsOptions = {};
 
@@ -31,9 +36,10 @@ var MongoClient = require('mongodb').MongoClient;
 
 var app = express();
 
-app.use(logger());
+//app.use(logger());
+app.use(cookieParser('secret'));
+app.use(session({secret: 'session-secret', cookie: {secure: true, maxAge: 365*24*60*60*1000}}));
 app.use(bodyParser());
-app.use(express.static(path.join(__dirname, 'webui')));
 
 var daysCollection = db.get('days');
 var enabledDaysCollection = db.get('enabledDays');
@@ -104,6 +110,19 @@ function genRandomGroups() {
 }
 
 
+app.use(function(req, res, next) {
+	var sess = req.session;
+	if (!sess.count) {
+		sess.count = 1;
+		next();
+	} else {
+		sess.count++;
+	next();
+	}
+});
+
+app.use(express.static(path.join(__dirname, 'webui')));
+
 app.route('/utils/:util')
 .get(function(req, res, next) {
 	if (req.params.util == 'valid-dates-in-month') {
@@ -134,23 +153,81 @@ app.route('/utils/:util')
 });
 
 
+app.route('/data/groups/:id/attendant')
+.post(function(req, res, next) {
+	var id = req.param('id');
+	var name = req.param('name');
+	daysCollection.findById(id, function(err, doc) {
+		var currentAttendants = doc.attendants || [];
+		for (var i=0; i < currentAttendants.length; i++) {
+			if (currentAttendants[i].name == name) {
+				res.json(doc);
+				return;
+			}
+		}
+		currentAttendants.push({name: name});
+		doc.attendants = currentAttendants;
+		daysCollection.updateById(id, doc, {}, function(err, rdoc) {
+			res.json(rdoc);
+		});
+	});
+})
+.delete(function(req, res, next) {
+	var id = req.param('id');
+	var name = req.param('name');
+	daysCollection.findById(id, function(err, doc) {
+		var attendants = [];
+		var currentAttendants = doc.attendants || [];
+		for (var i=0; i < currentAttendants.length; i++) {
+			if (currentAttendants[i].name != name) {
+				attendants.push(currentAttendants[i]);
+			}
+		}
+		if (attendants.length > 0) {
+			doc.attendants = attendants;
+			daysCollection.updateById(id, doc, {}, function(err, rdoc) {
+				res.json(rdoc);
+			});
+		} else {
+			daysCollection.remove({_id: id}, {}, function(err, rdoc) {
+				if (err) {
+					console.error('error deleting document:');
+					console.error(err);
+					res.status(400).json({success: false, msg: err});
+					return;
+				}
+				res.status(202).json({removed: true});
+			});
+		}
+	});
+});
+
+
 app.route('/data/groups/:id?')
 .get(function(req, res, next) {
-	var date = req.param('day');
-	daysCollection.find({date: date}, {}, function(err, docs) {
-		if (err) {
-			console.error('error fetching groups list: ' + err);
-			res.status(400).json([]);
-			return;
-		}
-		console.log('docs.length: ' + docs.length);
-		console.log('docs:');
-		console.log(docs);
-		if (USE_MOCK_DATA && !docs.length) {
-			res.json(genRandomGroups());
-		}
-		res.json(docs);
-	});
+	var id = req.param('id');
+	if (id) {
+		daysCollection.findById(id, function(err, doc) {
+			res.json(doc);
+		});
+	} else {
+		var date = req.param('day');
+		daysCollection.find({date: date}, {}, function(err, docs) {
+			if (err) {
+				console.error('error fetching groups list: ' + err);
+				res.status(400).json([]);
+				return;
+			}
+			console.log('docs.length: ' + docs.length);
+			console.log('docs:');
+			console.log(docs);
+			if (USE_MOCK_DATA && !docs.length) {
+				res.json(genRandomGroups());
+				return;
+			}
+			res.json(docs);
+		});
+	}
 })
 .all(function(req, res, next) {
 	// Preliminary checks for the following methods.
@@ -213,6 +290,22 @@ app.route('/data/groups/:id?')
 		}
 		res.status(202).json({success: true});
 	});
+});
+
+
+var fake_credentials = {giggi: '$2a$10$BOdCcAAegNUMH3i2M2CBJ.Ws.XbayZNibm7SJjw3NYBXznDv/mij2'};
+
+
+app.route('/login')
+.get(function(req, res, next) {
+	bcrypt.genSalt(10, function(err, salt) {
+		bcrypt.hash("bacon", salt, function(err, hash) {
+			console.log(hash);
+		});
+	});
+	res.send("ok");
+})
+.post(function(req, res, next) {
 });
 
 

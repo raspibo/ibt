@@ -1,5 +1,10 @@
 /** Models, collections and views. */
 
+ibt.personDefaults = {name: ''};
+ibt.Person = Backbone.Model.extend({
+	defaults: ibt.personDefaults,
+	idAttribute: '_id'
+});
 
 /** Model of a group. */
 ibt.groupDefaults = {date: '', group: '', attendants: []}
@@ -7,27 +12,58 @@ ibt.Group = Backbone.Model.extend({
 	defaults: ibt.groupDefaults,
 	idAttribute: '_id',
 
-	addUser: function(name) {
-		if (!name) {
+	parse: function(response, options) {
+		ibt.debug(['ibt.Groups.parse; response:', response, 'options:', options]);
+		if (!response) {
 			return;
 		}
-		var attendants = this.get('attendants') || [];
-		duplicated = false;
-		_.each(attendants, function(person) {
-			if (name == person.name) {
-				duplicated = true;
+		var personAttendants = [];
+		_.each(response.attendants || [], function(personData) {
+			var person = new ibt.Person(personData);
+			personAttendants.push(person);
+		});
+		response.attendants = personAttendants;
+		return response;
+	},
+
+	toJSON: function(options) {
+		var attributes =  _.clone(this.attributes);
+		var attendants = [];
+		_.each(this.attributes.attendants || [], function(person) {
+			attendants.push(person.toJSON(options));
+		});
+		attributes.attendants = attendants;
+		return attributes;
+	},
+
+	addUser: function(name) {
+		this.handleAttendants('add', name);
+	},
+
+	removeUser: function(name) {
+		this.handleAttendants('remove', name);
+	},
+
+	handleAttendants: function(action, name) {
+		var model = this;
+		type = 'POST';
+		if (action == 'remove') {
+			type = 'DELETE';
+		}
+		$.ajax({
+			url: model.url() + '/attendant',
+			type: type,
+			data: {
+				name: name,
+				group: model.get('group'),
+				date: model.get('date')}
+		}).success(function(data) {
+			if (data.removed) {
+				model.destroy({});
 				return;
 			}
+			model.fetch();
 		});
-		if (duplicated) {
-			ibt.warn('not adding duplicated user; name:' + name);
-			return false;
-		}
-		ibt.info('adding new user:' + name +
-			' to group:' + this.get('group'));
-		attendants.push({name: name});
-		this.set('attendants', attendants);
-		return true;
 	}
 });
 
@@ -36,6 +72,7 @@ ibt.Group = Backbone.Model.extend({
 ibt.Groups = Backbone.Collection.extend({
 	url: '/data/groups',
 	model: ibt.Group,
+
 });
 
 
@@ -110,10 +147,11 @@ ibt.AppView = Backbone.View.extend({
 		ibt.info(['create group:', groupName,
 			'on date:', this.selectedDate,
 			'by user:', personName]);
+		var person = new ibt.Person({name: personName});
 		this.groupsCollection.create({
 			date: this.selectedDate,
 			group: groupName,
-			attendants: [{name: personName}]
+			attendants: [person]
 		});
 	},
 
