@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RaspiBO makerspace booking</title>
+  <link rel="stylesheet" href="css/themes/smoothness/jquery-ui.css">
+  <script src="js/jquery-1.11.0.min.js"></script>
+  <script src="js/jquery-ui.js"></script>
+  <script src="js/ibt-init.js"></script>
+  <link rel="stylesheet" href="css/main.css">
+  <script language="JavaScript">
+
+$(document).ready(function() {
+
+$('#submit').click(function() {
+	var username = $('#username').val();
+	var password = $('#password').val();
+	var real_name = $('#real_name').val();
+	var email = $('#email').val();
+
+	$.ajax({
+		url: '/register',
+		type: 'POST',
+		data: {
+			username: username,
+			password: password,
+			real_name: real_name,
+			email: email
+		}
+	}).success(function(data) {
+		if (!data.success) {
+			alert('unable to signup: ' + data.msg);
+		} else {
+			document.location.href = "/";
+		}
+	});
+});
+
+});
+  </script>
+</head>
+<body>
+<h1>Sign up</h1>
+<label name="label_username">Username: </label><input type="text" name="username" id="username" /><br />
+<label name="label_password">Password: </label><input type="password" name="password" id="password" /></br />
+<label name="label_real_name">Real name (optional): </label><input type="real_name" name="real_name" id="real_name" /></br />
+<label name="label_email">email (optional): </label><input type="email" name="email" id="email" /></br />
+<input name="submit" type="submit" id="submit" />
+
+</body>

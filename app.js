@@ -307,7 +307,11 @@ app.route('/login')
 			return;
 		}
 		bcrypt.compare(doc.password, docs[0].password, function(err, result) {
-			res.json({success: result});
+			var ret = {success: result};
+			if (!result) {
+				ret['msg'] = 'wrong username or password';
+			}
+			res.json(ret);
 		});
 	});
 });
@@ -316,7 +320,7 @@ app.route('/register')
 .post(function(req, res, next) {
 	var doc = req.body;
 	if (!(doc.username && doc.password)) {
-		res.json({success: false, message: 'empty username or password'});
+		res.json({success: false, msg: 'empty username or password'});
 		return;
 	}
 	usersCollection.find({username: doc.username}, {}, function(err, docs) {

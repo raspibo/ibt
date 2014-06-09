@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RaspiBO makerspace booking</title>
+  <link rel="stylesheet" href="css/themes/smoothness/jquery-ui.css">
+  <script src="js/jquery-1.11.0.min.js"></script>
+  <script src="js/jquery-ui.js"></script>
+  <script src="js/ibt-init.js"></script>
+  <link rel="stylesheet" href="css/main.css">
+  <script language="JavaScript">
+
+$(document).ready(function() {
+
+$('#submit').click(function() {
+	var username = $('#username').val();
+	var password = $('#password').val();
+
+	$.ajax({
+		url: '/login',
+		type: 'POST',
+		data: {
+			username: username,
+			password: password
+		}
+	}).success(function(data) {
+		console.log(data);
+		if (!data.success) {
+			alert('unable to login: ' + data.msg);
+		} else {
+			document.location.href = "/";
+		}
+	});
+});
+
+});
+  </script>
+</head>
+<body>
+<h1>Login</h1>
+<label name="label_username">Username: </label><input type="text" name="username" id="username" />
+<label name="label_password">Password: </label><input type="password" name="password" id="password" />
+<input name="submit" type="submit" id="submit" />
+
+</body>
