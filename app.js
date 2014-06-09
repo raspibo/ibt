@@ -11,6 +11,8 @@ var session = require('express-session');
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/ibt?auto_reconnect=true');
+var MongoStore = require('connect-mongo')(session);
+
 var fs = require('fs');
 var bcrypt = require('bcrypt');
 
@@ -38,7 +40,12 @@ var app = express();
 
 //app.use(logger());
 app.use(cookieParser('secret'));
-app.use(session({secret: 'session-secret', cookie: {secure: true, maxAge: 365*24*60*60*1000}}));
+app.use(session({
+	secret: 'session-secret',
+	cookie: {secure: true, maxAge: 365*24*60*60*1000},
+	store: new MongoStore({url: 'mongodb://localhost:27017/ibt/sessions'})
+
+}));
 app.use(bodyParser());
 
 var daysCollection = db.get('days');
@@ -112,15 +119,10 @@ function genRandomGroups() {
 
 
 app.use(function(req, res, next) {
-	var sess = req.session;
-	if (!sess.count) {
-		sess.count = 1;
-		next();
-	} else {
-		sess.count++;
+	console.log('Logged in username: ' + req.session.username);
 	next();
-	}
 });
+
 
 app.use(express.static(path.join(__dirname, 'webui')));
 
@@ -310,11 +312,17 @@ app.route('/login')
 			var ret = {success: result};
 			if (!result) {
 				ret['msg'] = 'wrong username or password';
+				res.json(ret);
+				return;
 			}
-			res.json(ret);
+			req.session.username = doc.username;
+			req.session.save(function(err) {
+				res.json(ret);
+			});
 		});
 	});
 });
+
 
 app.route('/register')
 .post(function(req, res, next) {
@@ -337,12 +345,14 @@ app.route('/register')
 					email: doc.email
 				};
 				usersCollection.insert(user, {}, function(err, rdoc) {
+					if (!err) {
+						req.session.username = doc.username;
+					}
 					res.json({success: !err});
 				});
 			});
 		});
 	});
-
 });
 
 

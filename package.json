@@ -12,6 +12,7 @@
     "path": "0.4.9",
     "morgan": "1.0.0",
     "mongodb": "*",
+    "connect-mongo" : "*",
     "monk": "*"
   }
 }
