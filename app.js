@@ -42,6 +42,7 @@ app.use(session({secret: 'session-secret', cookie: {secure: true, maxAge: 365*24
 app.use(bodyParser());
 
 var daysCollection = db.get('days');
+var usersCollection = db.get('users');
 var enabledDaysCollection = db.get('enabledDays');
 var disabledDaysCollection = db.get('disabledDays');
 
@@ -293,19 +294,51 @@ app.route('/data/groups/:id?')
 });
 
 
-var fake_credentials = {giggi: '$2a$10$BOdCcAAegNUMH3i2M2CBJ.Ws.XbayZNibm7SJjw3NYBXznDv/mij2'};
-
-
 app.route('/login')
-.get(function(req, res, next) {
-	bcrypt.genSalt(10, function(err, salt) {
-		bcrypt.hash("bacon", salt, function(err, hash) {
-			console.log(hash);
+.post(function(req, res, next) {
+	var doc = req.body;
+	if (!(doc.username && doc.password)) {
+		res.json({success: false, msg: 'empty username or password'});
+		return;
+	}
+	usersCollection.find({username: doc.username}, {}, function(err, docs) {
+		if (docs.length != 1) {
+			res.json({success: false, msg: 'user not found'});
+			return;
+		}
+		bcrypt.compare(doc.password, docs[0].password, function(err, result) {
+			res.json({success: result});
 		});
 	});
-	res.send("ok");
-})
+});
+
+app.route('/register')
 .post(function(req, res, next) {
+	var doc = req.body;
+	if (!(doc.username && doc.password)) {
+		res.json({success: false, message: 'empty username or password'});
+		return;
+	}
+	usersCollection.find({username: doc.username}, {}, function(err, docs) {
+		if (docs.length > 0) {
+			res.json({success: false, msg: 'user already present'});
+			return;
+		}
+		bcrypt.genSalt(10, function(err, salt) {
+			bcrypt.hash(doc.password, salt, function(err, hash) {
+				var user = {
+					username: doc.username,
+					password: hash,
+					real_name: doc.real_name,
+					email: doc.email
+				};
+				usersCollection.insert(user, {}, function(err, rdoc) {
+					res.json({success: !err});
+				});
+			});
+		});
+	});
+
 });
 
 
