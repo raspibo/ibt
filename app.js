@@ -24,6 +24,9 @@ var https = require('https');
 var USE_MOCK_DATA = false;
 
 
+var HTTP_PORT = 3000;
+var HTTPS_PORT = 3001;
+
 var httpsOptions = {};
 
 try {
@@ -43,7 +46,8 @@ var app = express();
 app.use(cookieParser('secret'));
 app.use(session({
 	secret: 'session-secret',
-	cookie: {secure: true, maxAge: 365*24*60*60*1000},
+	// TODO: reintroduce secure: true, for the cookies.
+	cookie: {maxAge: 365*24*60*60*1000},
 	store: new MongoStore({url: 'mongodb://localhost:27017/ibt/sessions'})
 
 }));
@@ -132,7 +136,11 @@ app.route('(/|/*\.html)')
 			delete userData.password;
 		}
 		var page = swig.renderFile(path.join(__dirname, 'templates/' + url),
-			{userData: userData});
+			{userData: userData,
+			reqProtocol: req.protocol,
+			reqHost: req.host,
+			httpsPort: HTTPS_PORT
+			});
 		res.send(page);
 	});
 });
@@ -378,8 +386,8 @@ app.route('/logout')
 });
 
 
-http.createServer(app).listen(3000);
+http.createServer(app).listen(HTTP_PORT);
 if (httpsOptions.key && httpsOptions.cert) {
-	https.createServer(httpsOptions, app).listen(3001);
+	https.createServer(httpsOptions, app).listen(HTTPS_PORT);
 }
 

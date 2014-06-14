@@ -41,13 +41,23 @@ $('#password').keypress(function(e) {
 		return false;
 	}
 });
+$('#username').keypress(function(e) {
+	if (e.which == 13) {
+		$('#password').focus();
+		return false;
+	}
+});
 
 
 });
   </script>
 </head>
 <body>
+<div id="header"><a href="/signup.html">sign up</a> | <a href="/">home</a> {% if reqProtocol == 'http' %} | <a href="https://{{reqHost}}:{{httpsPort}}/login.html">secure version</a>{% endif %}</div>
+
 <h1>Login</h1>
+Logged in users can remove their own entries. Entries created by unregistered users can be removed by anyone.<br />
+<br />
 <label name="label_username">Username: </label><input type="text" name="username" id="username" />
 <label name="label_password">Password: </label><input type="password" name="password" id="password" />
 <input name="submit" type="submit" id="submit" />

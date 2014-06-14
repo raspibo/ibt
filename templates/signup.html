@@ -40,7 +40,11 @@ $('#submit').click(function() {
   </script>
 </head>
 <body>
+<div id="header"><a href="/login.html">login</a> | <a href="/">home</a> {% if reqProtocol == 'http' %} | <a href="https://{{reqHost}}:{{httpsPort}}/signup.html">secure version</a>{% endif %}</div>
+
 <h1>Sign up</h1>
+Logged in users can remove their own entries. Entries created by unregistered users can be removed by anyone.<br />
+<br />
 <label name="label_username">Username: </label><input type="text" name="username" id="username" /><br />
 <label name="label_password">Password: </label><input type="password" name="password" id="password" /></br />
 <label name="label_real_name">Real name (optional): </label><input type="real_name" name="real_name" id="real_name" /></br />

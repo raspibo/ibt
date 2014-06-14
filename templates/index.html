@@ -142,6 +142,7 @@ $(document).ready(function() {
   </script>
 </head>
 <body>
+<div id="header">{% if userData.username %}Logged in as: {{userData.username}} <span class="logout">[<a href="/logout">logout</a>]</span>{% else %}<a href="/login.html">login</a> | <a href="/signup.html">sign up</a> {% endif %}{% if reqProtocol == 'http' %} | <a href="https://{{reqHost}}:{{httpsPort}}">secure version</a>{% endif %}</div>
 
 <h1>RaspiBO makerspace booking</h1>
 
