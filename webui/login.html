@@ -12,7 +12,7 @@
 
 $(document).ready(function() {
 
-$('#submit').click(function() {
+var submitForm = function() {
 	var username = $('#username').val();
 	var password = $('#password').val();
 
@@ -31,7 +31,17 @@ $('#submit').click(function() {
 			document.location.href = "/";
 		}
 	});
+};
+
+
+$('#submit').click(submitForm);
+$('#password').keypress(function(e) {
+	if (e.which == 13) {
+		submitForm();
+		return false;
+	}
 });
+
 
 });
   </script>
