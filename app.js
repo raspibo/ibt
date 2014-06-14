@@ -356,6 +356,15 @@ app.route('/register')
 });
 
 
+app.route('/logout')
+.get(function(req, res, next) {
+	if (req.session.username) {
+		req.session.destroy(function(err) {});
+	}
+	res.redirect('/');
+});
+
+
 http.createServer(app).listen(3000);
 if (httpsOptions.key && httpsOptions.cert) {
 	https.createServer(httpsOptions, app).listen(3001);
