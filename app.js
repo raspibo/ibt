@@ -5,6 +5,7 @@
 var path = require('path');
 var logger = require('morgan');
 var express = require('express');
+var swig  = require('swig');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
@@ -118,13 +119,17 @@ function genRandomGroups() {
 }
 
 
-app.use(function(req, res, next) {
-	console.log('Logged in username: ' + req.session.username);
-	next();
+app.route('(/|/*\.html)')
+.get(function(req, res, next) {
+	var url = req.params[0];
+	if (url == '/' || !url) {
+		url = '/index.html';
+	}
+	var page = swig.renderFile(path.join(__dirname, 'templates/' + url));
+	res.send(page);
 });
 
-
-app.use(express.static(path.join(__dirname, 'webui')));
+app.use(express.static(path.join(__dirname, 'static')));
 
 app.route('/utils/:util')
 .get(function(req, res, next) {
