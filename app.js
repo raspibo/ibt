@@ -188,9 +188,15 @@ app.route('/data/groups/:id/attendant')
 	daysCollection.findById(id, function(err, doc) {
 		var attendants = [];
 		var currentAttendants = doc.attendants || [];
+		var attendant;
 		for (var i=0; i < currentAttendants.length; i++) {
-			if (currentAttendants[i].name != name) {
-				attendants.push(currentAttendants[i]);
+			attendant = currentAttendants[i];
+			if (attendant.name != name) {
+				attendants.push(attendant);
+			} else if (attendant._createdBy && attendant._createdBy != req.session.username) {
+				console.log('user ' + req.session.username + ' attempted to delete user ' + attendant.name + ' created by ' + attendant._createdBy + 'on document:');
+				console.log(doc);
+				attendants.push(attendant);
 			}
 		}
 		if (attendants.length > 0) {
