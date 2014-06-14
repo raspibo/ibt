@@ -16,7 +16,7 @@
 
 // Enabled dates in the shown month.
 ibt.enabledDatesOfMonth = [];
-
+ibt.userData = {{JSON.stringify(userData)}};
 
 /** Enable days in the calendar according to the content
     of ibt.enabledDatesOfMonth. */
@@ -150,7 +150,7 @@ $(document).ready(function() {
 <div class="group-attendants">
 	<label><%= i18n('Attendants')%>:</label>
 	<ul class="group-attendants-list">
-	  <% _.each(attendants, function(person) { %><li><a href="#" class="destroy destroy-user" name="<%- person.get('name') %>" title="remove this user">&nbsp;&nbsp;&nbsp;&nbsp;</a><span class="user-name" value="<%- person.get('name') %>"><%- person.get('name') %></span></li> <% }); %>
+	  <% _.each(attendants, function(person) { %><li><% if (ibt.userData.username == person.get('_createdBy') || !person.get('_createdBy')) { %><a href="#" class="destroy destroy-user" name="<%- person.get('name') %>" title="remove this user"><% } else { %><span class="destroy-user">&nbsp;</span><% } %>&nbsp;&nbsp;&nbsp;&nbsp;</a><span class="user-name" value="<%- person.get('name') %>"><%- person.get('name') %></span></li> <% }); %>
 	  <li><span class="add-user-icon">&nbsp;&nbsp;&nbsp;&nbsp;</span><input type="text" size="20" class="add-user" placeholder="add your name" title="press enter to save" /></li>
 	</ul>
 </div>

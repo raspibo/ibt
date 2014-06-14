@@ -125,8 +125,16 @@ app.route('(/|/*\.html)')
 	if (url == '/' || !url) {
 		url = '/index.html';
 	}
-	var page = swig.renderFile(path.join(__dirname, 'templates/' + url));
-	res.send(page);
+	var userData = {};
+	usersCollection.find({username: req.session.username}, {}, function(err, docs) {
+		if (docs.length == 1) {
+			userData = docs[0];
+			delete userData.password;
+		}
+		var page = swig.renderFile(path.join(__dirname, 'templates/' + url),
+			{userData: userData});
+		res.send(page);
+	});
 });
 
 app.use(express.static(path.join(__dirname, 'static')));
