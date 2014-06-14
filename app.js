@@ -156,7 +156,7 @@ app.route('/utils/:util')
 });
 
 
-function addUserToGroup(res, id, name) {
+function addUserToGroup(req, res, id, name) {
 	daysCollection.findById(id, function(err, doc) {
 		var currentAttendants = doc.attendants || [];
 		for (var i=0; i < currentAttendants.length; i++) {
@@ -165,11 +165,9 @@ function addUserToGroup(res, id, name) {
 				return;
 			}
 		}
-		currentAttendants.push({name: name});
+		currentAttendants.push({name: name, _createdBy: req.session.username});
 		doc.attendants = currentAttendants;
 		daysCollection.updateById(id, doc, {}, function(err, rdoc) {
-			console.log('RRRRRRRRRRRRRRRRRRRRR');
-			console.log(doc);
 			res.json(doc);
 		});
 	});
@@ -181,7 +179,7 @@ app.route('/data/groups/:id/attendant')
 	/* Add a user to a group. */
 	var id = req.param('id');
 	var name = req.param('name');
-	addUserToGroup(res, id, name);
+	addUserToGroup(req, res, id, name);
 })
 .delete(function(req, res, next) {
 	/* Remove a user from a group. */
@@ -264,6 +262,11 @@ app.route('/data/groups/:id?')
 	var doc = req.body;
 	console.info('create a new document:');
 	console.info(doc);
+	var attendant = {};
+	if (doc.attendants.length > 0) {
+		doc.attendants[0]._createdBy = req.session.username;
+		attendant = doc.attendants[0];
+	}
 	daysCollection.find({date: doc.date, group: doc.group}, {}, function(err, docs) {
 		if (docs.length == 0) {
 			daysCollection.insert(doc, {}, function(err, rdoc) {
@@ -276,7 +279,7 @@ app.route('/data/groups/:id?')
 				res.status(201).json(doc);
 			});
 		} else {
-			addUserToGroup(res, docs[0]._id, doc.attendants[0].name);
+			addUserToGroup(req, res, docs[0]._id, attendant.name);
 		}
 	});
 })

@@ -1,6 +1,6 @@
 /** Models, collections and views. */
 
-ibt.personDefaults = {name: ''};
+ibt.personDefaults = {name: '', _createdBy: null};
 ibt.Person = Backbone.Model.extend({
 	defaults: ibt.personDefaults,
 	idAttribute: '_id'
