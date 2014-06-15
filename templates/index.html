@@ -103,18 +103,23 @@ $(document).ready(function() {
 		render: function() {
 			ibt.debug('ibt.GroupView.render');
 			this.$el.html(this.template(this.model.attributes));
+			var that = this;
+			this.$el.find('.add-user-icon').click(function() {
+				that.addUser({keyCode: 13}, that);
+			});
 			return this;
 		},
 
-		addUser: function(evt) {
+		addUser: function(evt, that) {
 			if (evt.keyCode != 13) {
 				return;
 			}
-			var name = this.$('.add-user').val();
+			if (!that) that = this;
+			var name = that.$('.add-user').val();
 			if (!name) {
 				return;
 			}
-			this.model.addUser(name);
+			that.model.addUser(name);
 		},
 
 		removeUser: function(evt) {

@@ -114,6 +114,7 @@
 	margin-left: 5px;
 	position: relative;
 	top: 5px;
+	cursor: pointer;
 	background: url(dialog-more.png) no-repeat;
 }
 

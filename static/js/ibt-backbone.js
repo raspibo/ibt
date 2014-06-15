@@ -101,6 +101,10 @@ ibt.AppView = Backbone.View.extend({
 		this.$('#groups-list').append('<div class="group-item" id="add-group">' +
 			ibt.groupViewTemplate(ibt.groupDefaults) +
 			'</div>');
+		var that = this;
+		this.$('#add-group').find('.add-user-icon').click(function() {
+			that.newGroup({keyCode: 13}, that);
+		});
 		return this;
 	},
 
@@ -114,11 +118,14 @@ ibt.AppView = Backbone.View.extend({
 		this.groupsCollection.each(this.addGroup, this);
 	},
 
-	newGroup: function(evt) {
+	newGroup: function(evt, that) {
 		if (evt.keyCode != 13) {
 			return;
 		}
-		if (!this.selectedDate) {
+		if (!that) {
+			that = this;
+		}
+		if (!that.selectedDate) {
 			return;
 		}
 		var personName = $('#add-group .add-user').val();
@@ -132,7 +139,7 @@ ibt.AppView = Backbone.View.extend({
 			return;
 		}
 		var duplicatedGroup = null;
-		this.groupsCollection.each(function(group) {
+		that.groupsCollection.each(function(group) {
 			if (group.get('group') == groupName) {
 				duplicatedGroup = group;
 				return;
@@ -145,11 +152,11 @@ ibt.AppView = Backbone.View.extend({
 			return;
 		}
 		ibt.info(['create group:', groupName,
-			'on date:', this.selectedDate,
+			'on date:', that.selectedDate,
 			'by user:', personName]);
 		var person = new ibt.Person({name: personName});
-		this.groupsCollection.create({
-			date: this.selectedDate,
+		that.groupsCollection.create({
+			date: that.selectedDate,
 			group: groupName,
 			attendants: [person]
 		});
