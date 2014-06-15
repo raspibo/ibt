@@ -25,9 +25,9 @@ Ideas for improvements
 * error handling and show messages on the UI
 * ajax auto-completion of group and user names
 * periodic/push refresh
-* user login and permissions (at least on deleting items)
 * admin credentials and management page (to add/remove extra dates, for example)
-* user's preferences (at least to remember the name)
+* fill the input fields with the real name or username of a logged in user
+* edit user's preferences
 
 TODO (technical stuff)
 ======================
