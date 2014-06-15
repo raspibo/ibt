@@ -21,7 +21,14 @@
 	padding: 4px;
 }
 
-#header a {
+#footer {
+	background-color: lightgray;
+	text-align: center;
+	padding: 4px;
+	font-size: small;
+}
+
+#header a, #footer a {
 	text-decoration: none;
 	color: #990000;
 }
@@ -35,7 +42,7 @@
 }
 
 #active {
-	height: 600px;
+	height: 400px;
 }
 
 .groups-list {
