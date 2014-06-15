@@ -16,15 +16,14 @@
 }
 
 #header {
-	background-color: gray;
+	background-color: lightgray;
 	text-align: right;
-	color: white;
 	padding: 4px;
 }
 
 #header a {
 	text-decoration: none;
-	color: white;
+	color: #990000;
 }
 
 #header .logout {
