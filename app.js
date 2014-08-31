@@ -26,6 +26,7 @@ var USE_MOCK_DATA = false;
 
 var HTTP_PORT = 3000;
 var HTTPS_PORT = 3001;
+var PID_FILE = 'ibt.pid';
 
 var httpsOptions = {};
 
@@ -38,7 +39,36 @@ try {
 	console.warn('missing certificates; https will not be enabled: ' + error);
 }
 
-var MongoClient = require('mongodb').MongoClient;
+
+try {
+	fs.writeFileSync(PID_FILE, process.pid.toString());
+} catch (error) {
+	console.log('Unable to write ' + PID_FILE + ': ' + err);
+}
+
+
+process.on('uncaughtException', function(err) {
+	console.log('Caught exception: ' + err);
+	//setTimeout(connectToMongodb, 10000);
+	process.exit(1);
+});
+
+
+var MongoClient;
+var daysCollection;
+var usersCollection;
+var enabledDaysCollection;
+var disabledDaysCollection;
+
+function connectToMongodb() {
+	MongoClient = require('mongodb').MongoClient;
+	daysCollection = db.get('days');
+	usersCollection = db.get('users');
+	enabledDaysCollection = db.get('enabledDays');
+	disabledDaysCollection = db.get('disabledDays');
+}
+
+connectToMongodb();
 
 var app = express();
 
@@ -52,12 +82,6 @@ app.use(session({
 
 }));
 app.use(bodyParser());
-
-var daysCollection = db.get('days');
-var usersCollection = db.get('users');
-var enabledDaysCollection = db.get('enabledDays');
-var disabledDaysCollection = db.get('disabledDays');
-
 
 function enabledDates(year, month, includeDays, excludeDays) {
 	month -= 1;
