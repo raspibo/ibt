@@ -98,7 +98,7 @@ function enabledDates(year, month, includeDays, excludeDays) {
 		if (dayOfWeek == 2) {
 			tueCounts += 1;
 		}
-		if (dayOfWeek == 1 || dayOfWeek == 4 || (dayOfWeek == 2 && (tueCounts == 2 || tueCounts == 4))) {
+		if (dayOfWeek == 4 || (dayOfWeek == 2 && (tueCounts == 2 || tueCounts == 4)) || (dayOfWeek == 1 && (year <= 2014 && month < 8) )) {
 			if (excludeDays.indexOf(date) == -1) {
 				validDays.push(date);
 			}
