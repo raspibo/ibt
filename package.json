@@ -10,7 +10,7 @@
     "express-session": "*",
     "bcrypt": "0.7.8",
     "path": "0.4.9",
-    "morgan": "1.0.0",
+    "morgan": "1.10.0",
     "mongodb": "*",
     "connect-mongo": "*",
     "monk": "*",
